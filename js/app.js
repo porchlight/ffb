@@ -35,16 +35,21 @@ function initializeApp() {
 
     // Set up event listeners for the buttons
     document.getElementById('export-csv').addEventListener('click', exportToCSV);
+    document.getElementById('import-csv').addEventListener('click', triggerCsvImport);
     document.getElementById('reset-rankings').addEventListener('click', resetRankings);
 
     // Set up event listeners for the top buttons
     document.getElementById('export-csv-top').addEventListener('click', exportToCSV);
+    document.getElementById('import-csv-top').addEventListener('click', triggerCsvImport);
     document.getElementById('reset-rankings-top').addEventListener('click', resetRankings);
 
     // Set up the upload buttons for custom Fantasy Pros cheat sheet
     document.getElementById('upload-cheat-sheet').addEventListener('click', triggerFileUpload);
     document.getElementById('upload-cheat-sheet-top').addEventListener('click', triggerFileUpload);
     document.getElementById('cheat-sheet-file').addEventListener('change', handleFileUpload);
+
+    // Set up CSV import
+    document.getElementById('csv-import-file').addEventListener('change', handleCsvImport);
 
     // Set up clear custom sheet buttons
     document.getElementById('clear-custom-sheet').addEventListener('click', clearCustomCheatSheet);
@@ -573,4 +578,189 @@ function hideLoadingIndicator() {
     if (loadingOverlay) {
         loadingOverlay.remove();
     }
+}
+
+/**
+ * Trigger CSV import dialog
+ */
+function triggerCsvImport() {
+    document.getElementById('csv-import-file').click();
+}
+
+/**
+ * Handle CSV import
+ */
+function handleCsvImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if it's a CSV file
+    if (!file.type.includes('csv') && !file.name.endsWith('.csv')) {
+        alert('Please select a CSV file exported from this app.');
+        return;
+    }
+
+    // Show loading indicator
+    showLoadingIndicator();
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            // Get the CSV content
+            const csvContent = e.target.result;
+
+            // Parse the CSV and update the rankings
+            const importResult = await importCsvRankings(csvContent);
+
+            if (importResult) {
+                // Refresh the UI
+                initializeApp();
+
+                // Show success message
+                alert('Rankings imported successfully!');
+            } else {
+                throw new Error('Failed to import rankings');
+            }
+        } catch (error) {
+            console.error('Error importing CSV:', error);
+            alert('Error importing the CSV file. Please make sure it was exported from this app.');
+        } finally {
+            // Hide loading indicator
+            hideLoadingIndicator();
+            // Reset the file input
+            event.target.value = '';
+        }
+    };
+
+    reader.onerror = function() {
+        hideLoadingIndicator();
+        alert('Error reading the file. Please try again.');
+        event.target.value = '';
+    };
+
+    // Read the file as text
+    reader.readAsText(file);
+}
+
+/**
+ * Import rankings from CSV
+ */
+async function importCsvRankings(csvContent) {
+    try {
+        // Split the CSV content into lines
+        const lines = csvContent.split('\n');
+
+        // Skip the header row
+        if (lines.length <= 1) {
+            throw new Error('CSV file is empty or invalid');
+        }
+
+        // First make sure current data is loaded
+        await playersParser.loadDefaultData();
+
+        // Parse player data from CSV by position
+        const importedPlayers = {
+            overall: [],
+            qb: [],
+            rb: [],
+            wr: [],
+            te: [],
+            k: [],
+            dst: []
+        };
+
+        // Process each line
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            // Parse the CSV line
+            const columns = parseCSVLine(line);
+
+            if (columns.length < 5) continue;
+
+            const positionCategory = columns[0].toLowerCase();
+            const rank = parseInt(columns[1], 10);
+            const name = columns[2];
+            const team = columns[3];
+            const tag = columns[4];
+
+            // Determine the position key
+            let posKey;
+            if (positionCategory.toLowerCase() === 'overall') {
+                posKey = 'overall';
+            } else if (positionCategory.toLowerCase() === 'qb') {
+                posKey = 'qb';
+            } else if (positionCategory.toLowerCase() === 'rb') {
+                posKey = 'rb';
+            } else if (positionCategory.toLowerCase() === 'wr') {
+                posKey = 'wr';
+            } else if (positionCategory.toLowerCase() === 'te') {
+                posKey = 'te';
+            } else if (positionCategory.toLowerCase() === 'k') {
+                posKey = 'k';
+            } else if (positionCategory.toLowerCase() === 'dst') {
+                posKey = 'dst';
+            } else {
+                continue; // Skip invalid positions
+            }
+
+            // Find the player in the current data to get position info
+            const position = playersParser.getPlayerPosition(name, team);
+
+            // Add the player to the imported list
+            importedPlayers[posKey].push({
+                id: `${posKey}-${rank}`,
+                rank: rank,
+                name: name,
+                team: team,
+                position: position || positionCategory.toUpperCase(),
+                tag: tag
+            });
+        }
+
+        // Sort each position by rank
+        for (const posKey in importedPlayers) {
+            importedPlayers[posKey].sort((a, b) => a.rank - b.rank);
+        }
+
+        // Update the players parser data
+        for (const posKey in importedPlayers) {
+            if (importedPlayers[posKey].length > 0) {
+                playersParser.players[posKey] = importedPlayers[posKey];
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error parsing CSV:', error);
+        return false;
+    }
+}
+
+/**
+ * Parse a CSV line, handling quoted fields
+ */
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+
+    // Add the last field
+    result.push(current);
+
+    return result;
 }

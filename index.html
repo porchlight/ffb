@@ -14,6 +14,7 @@
             <p class="text-center">Drag and drop players to create your own personalized cheat sheet</p>
             <div class="text-center mb-4">
                 <button id="export-csv-top" class="btn btn-primary">Export to CSV</button>
+                <button id="import-csv-top" class="btn btn-success ms-2">Import CSV</button>
                 <button id="reset-rankings-top" class="btn btn-secondary ms-2">Reset Rankings</button>
                 <button id="upload-cheat-sheet-top" class="btn btn-info ms-2">Upload Fantasy Pros Cheat Sheet</button>
                 <button id="clear-custom-sheet-top" class="btn btn-warning ms-2 clear-custom-btn" style="display: none;">Clear Custom Sheet</button>
@@ -74,11 +75,13 @@
         <div class="row mt-4 mb-5">
             <div class="col-12 text-center">
                 <button id="export-csv" class="btn btn-primary">Export to CSV</button>
+                <button id="import-csv" class="btn btn-success ms-2">Import CSV</button>
                 <button id="reset-rankings" class="btn btn-secondary ms-2">Reset Rankings</button>
                 <button id="upload-cheat-sheet" class="btn btn-info ms-2">Upload Fantasy Pros Cheat Sheet</button>
                 <button id="clear-custom-sheet" class="btn btn-warning ms-2 clear-custom-btn" style="display: none;">Clear Custom Sheet</button>
-                <!-- Hidden file input for cheat sheet upload -->
+                <!-- Hidden file inputs -->
                 <input type="file" id="cheat-sheet-file" accept=".html" style="display: none;">
+                <input type="file" id="csv-import-file" accept=".csv" style="display: none;">
             </div>
         </div>
     </div>
