@@ -20,8 +20,16 @@ class PlayersParser {
      */
     async loadDefaultData() {
         try {
-            const response = await fetch('assets/sheet/Fantasy Football Cheat Sheet_ 2025.html');
-            const html = await response.text();
+            // Check if there's a custom cheat sheet in localStorage
+            let html;
+            if (localStorage.getItem('custom_cheat_sheet')) {
+                console.log("Loading custom cheat sheet from localStorage");
+                html = localStorage.getItem('custom_cheat_sheet');
+            } else {
+                console.log("Loading default cheat sheet from assets");
+                const response = await fetch('assets/sheet/Fantasy Football Cheat Sheet_ 2025.html');
+                html = await response.text();
+            }
 
             // Create a temporary DOM element to parse the HTML
             const parser = new DOMParser();
@@ -38,6 +46,8 @@ class PlayersParser {
                 dst: []
             };
 
+            console.log("Parsing position sections...");
+
             // Parse each position section first
             this.parsePositionSection(doc, 'Quarterbacks', 'qb');
             this.parsePositionSection(doc, 'Running Backs', 'rb');
@@ -49,8 +59,21 @@ class PlayersParser {
             // Parse overall section last so we can determine positions
             this.parsePositionSection(doc, 'Overall', 'overall');
 
+            console.log("Finished parsing position sections. Position player counts:", {
+                qb: this.players.qb.length,
+                rb: this.players.rb.length,
+                wr: this.players.wr.length,
+                te: this.players.te.length,
+                k: this.players.k.length,
+                dst: this.players.dst.length,
+                overall: this.players.overall.length
+            });
+
             // Update positions in the overall list
             this.updateOverallPositions();
+
+            // Make sure ranks match array order
+            this.normalizeRanks();
 
             this.loaded = true;
             return true;
@@ -61,10 +84,33 @@ class PlayersParser {
     }
 
     /**
+     * Normalize ranks to match array order
+     */
+    normalizeRanks() {
+        // For each position category, make sure rank matches array index + 1
+        for (const posKey of Object.keys(this.players)) {
+            this.players[posKey].forEach((player, index) => {
+                player.rank = index + 1;
+                player.id = `${posKey}-${index + 1}`;
+            });
+        }
+
+        console.log("Normalized ranks for all player lists");
+    }
+
+    /**
      * Update positions in the overall list by cross-referencing with position-specific lists
      */
     updateOverallPositions() {
-        this.players.overall.forEach(player => {
+        console.log("Updating positions in overall list...");
+        console.log("Current overall player count:", this.players.overall.length);
+
+        // Track position changes for debugging
+        const changes = [];
+
+        this.players.overall.forEach((player, index) => {
+            const oldPosition = player.position;
+
             // Try to find this player in a position-specific list
             for (const posKey of ['qb', 'rb', 'wr', 'te', 'k', 'dst']) {
                 const posPlayer = this.players[posKey].find(p =>
@@ -73,10 +119,40 @@ class PlayersParser {
 
                 if (posPlayer) {
                     player.position = posPlayer.position;
+
+                    // Track position changes for debugging
+                    if (oldPosition !== player.position) {
+                        changes.push({
+                            index: index + 1,
+                            name: player.name,
+                            team: player.team,
+                            oldPosition: oldPosition,
+                            newPosition: player.position
+                        });
+                    }
+
                     break;
                 }
             }
         });
+
+        // Log the first few players and any position changes
+        console.log("Updated positions in overall list. First 5 players:",
+            this.players.overall.slice(0, 5).map(p => ({
+                rank: p.rank,
+                name: p.name,
+                team: p.team,
+                position: p.position
+            }))
+        );
+
+        if (changes.length > 0) {
+            console.log(`Position changes made (${changes.length}):`, changes);
+        } else {
+            console.log("No position changes were needed");
+        }
+
+        return changes.length; // Return the number of changes made
     }
 
     /**
@@ -222,6 +298,49 @@ class PlayersParser {
         }
 
         return this.players;
+    }
+
+    /**
+     * Find a player by name and team across all position lists
+     */
+    findPlayerByNameAndTeam(name, team) {
+        for (const posKey of Object.keys(this.players)) {
+            const player = this.players[posKey].find(p =>
+                p.name === name && p.team === team
+            );
+
+            if (player) {
+                return {
+                    player,
+                    positionKey: posKey
+                };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get a player's position based on name and team
+     * @param {string} name - Player name
+     * @param {string} team - Player team
+     * @returns {string} - Position string or "FLEX" if not found
+     */
+    getPlayerPosition(name, team) {
+        // First check position-specific lists which have reliable position data
+        const positionCategories = ['qb', 'rb', 'wr', 'te', 'k', 'dst'];
+        for (const category of positionCategories) {
+            const found = this.players[category].find(
+                player => player.name === name && player.team === team
+            );
+            if (found) return found.position;
+        }
+
+        // If not found in position lists, check overall
+        const overallPlayer = this.players.overall.find(
+            player => player.name === name && player.team === team
+        );
+        return overallPlayer ? overallPlayer.position : "FLEX";
     }
 }
 
