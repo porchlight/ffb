@@ -1,0 +1,97 @@
+.player-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    min-height: 400px;
+}
+
+.player-card {
+    background-color: white;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    cursor: grab;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-card:active {
+    cursor: grabbing;
+}
+
+.player-card .player-rank {
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 25px;
+}
+
+.player-card .player-name {
+    flex-grow: 1;
+}
+
+.player-card .player-team {
+    color: #6c757d;
+    margin-left: 5px;
+    font-size: 0.9em;
+}
+
+.player-card .player-position {
+    margin-left: 10px;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.player-card.sortable-ghost {
+    opacity: 0.5;
+    background-color: #e9ecef;
+}
+
+.player-card.target-tag {
+    background-color: #EDF7E8;
+    font-weight: bold;
+}
+
+.player-card.sleeper-tag {
+    background-color: #DEECFC;
+    font-weight: bold;
+}
+
+.player-card.avoid-tag {
+    background-color: #F2D0CB;
+    font-weight: bold;
+}
+
+.tag-controls {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.tag-btn {
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+.tag-btn.target {
+    background-color: #EDF7E8;
+}
+
+.tag-btn.sleeper {
+    background-color: #DEECFC;
+}
+
+.tag-btn.avoid {
+    background-color: #F2D0CB;
+}
+
+.tag-btn.none {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
