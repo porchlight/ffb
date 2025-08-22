@@ -27,8 +27,42 @@ class PlayersParser {
                 html = localStorage.getItem('custom_cheat_sheet');
             } else {
                 console.log("Loading default cheat sheet from assets");
-                const response = await fetch('assets/sheet/Fantasy Football Cheat Sheet_ 2025.html');
-                html = await response.text();
+                try {
+                    const paths = [
+                        'assets/sheet/Fantasy Football Cheat Sheet_ 2025.html',
+                        '/assets/sheet/Fantasy Football Cheat Sheet_ 2025.html'
+                    ];
+
+                    let fetchSuccess = false;
+                    let lastError = null;
+
+                    // Try each path until one works
+                    for (const testPath of paths) {
+                        try {
+                            console.log(`Trying to fetch cheat sheet from: ${testPath}`);
+                            const response = await fetch(testPath);
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+
+                            html = await response.text();
+                            console.log(`Successfully loaded cheat sheet from: ${testPath}`);
+                            fetchSuccess = true;
+                            break;
+                        } catch (e) {
+                            console.log(`Failed to fetch from ${testPath}: ${e.message}`);
+                            lastError = e;
+                        }
+                    }
+
+                    if (!fetchSuccess) {
+                        throw new Error(`Failed to load cheat sheet from any path: ${lastError?.message}`);
+                    }
+                } catch (e) {
+                    console.error("All fetch attempts failed:", e);
+                    throw e;
+                }
             }
 
             // Create a temporary DOM element to parse the HTML

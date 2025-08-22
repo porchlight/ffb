@@ -48,10 +48,6 @@ The application uses the 2025 Fantasy Football Cheat Sheet as its default data s
 - [Sortable.js](https://github.com/SortableJS/Sortable) for drag and drop functionality
 - [Bootstrap](https://getbootstrap.com/) for UI components
 
-## License
-
-This project is for personal use only.
-
 ## Author
 
-Created by [Your Name]
+Created by Travis Neilans

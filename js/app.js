@@ -3,15 +3,24 @@
  * Main application script
  */
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load player data
-    const loadingResult = await playersParser.loadDefaultData();
-    if (!loadingResult) {
-        alert('Error loading player data. Please refresh the page to try again.');
-        return;
-    }
+    console.log("App starting... Loading player data");
+    try {
+        // Load player data
+        const loadingResult = await playersParser.loadDefaultData();
+        if (!loadingResult) {
+            console.error("Failed to load player data");
+            alert('Error loading player data. Please refresh the page to try again.');
+            return;
+        }
 
-    // Initialize the app
-    initializeApp();
+        console.log("Player data loaded successfully");
+
+        // Initialize the app
+        initializeApp();
+    } catch (error) {
+        console.error("Error during app startup:", error);
+        alert('Error initializing the app. Please check the console for details and refresh.');
+    }
 });
 
 /**
