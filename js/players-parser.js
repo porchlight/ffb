@@ -29,8 +29,8 @@ class PlayersParser {
                 console.log("Loading default cheat sheet from assets");
                 try {
                     const paths = [
-                        'assets/sheet/Fantasy Football Cheat Sheet_ 2025.html',
-                        '/assets/sheet/Fantasy Football Cheat Sheet_ 2025.html'
+                        'assets/sheet/Fantasy Football Cheat Sheet_ 2026.html',
+                        '/assets/sheet/Fantasy Football Cheat Sheet_ 2026.html'
                     ];
 
                     let fetchSuccess = false;
@@ -210,8 +210,8 @@ class PlayersParser {
 
         // Navigate to the parent container
         while (currentElement &&
-               !currentElement.classList.contains('span25') &&
-               !currentElement.id.startsWith('playerlist-')) {
+            !currentElement.classList.contains('span25') &&
+            !currentElement.id.startsWith('playerlist-')) {
             currentElement = currentElement.parentElement;
         }
 
@@ -223,8 +223,8 @@ class PlayersParser {
         // Get all direct div children that contain player data
         playerDivs = Array.from(currentElement.children).filter(el => {
             return el.tagName === 'DIV' &&
-                   !el.classList.contains('auction-value') &&
-                   el.textContent.trim().match(/^\d+\.\s+.+,\s+[A-Z]{1,4}\s*$/);
+                !el.classList.contains('auction-value') &&
+                el.textContent.trim().match(/^\d+\.\s+.+,\s+[A-Z]{1,4}\s*$/);
         });
 
         // If this is the "Overall" section, we need to check the next span25 elements too
@@ -234,8 +234,8 @@ class PlayersParser {
                 // Get player divs from this span
                 const moreDivs = Array.from(nextSpan.children).filter(el => {
                     return el.tagName === 'DIV' &&
-                           !el.classList.contains('auction-value') &&
-                           el.textContent.trim().match(/^\d+\.\s+.+,\s+[A-Z]{1,4}\s*$/);
+                        !el.classList.contains('auction-value') &&
+                        el.textContent.trim().match(/^\d+\.\s+.+,\s+[A-Z]{1,4}\s*$/);
                 });
 
                 playerDivs = playerDivs.concat(moreDivs);

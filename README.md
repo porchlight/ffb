@@ -38,7 +38,7 @@ This will start a local server at http://localhost:3000.
 
 ## Default Data
 
-The application uses the 2025 Fantasy Football Cheat Sheet as its default data source. This data is loaded from the `assets/sheet/Fantasy Football Cheat Sheet_ 2025.html` file.
+The application uses the 2026 Fantasy Football Cheat Sheet as its default data source. This data is loaded from the `assets/sheet/Fantasy Football Cheat Sheet_ 2026.html` file.
 
 ## Technologies Used
 

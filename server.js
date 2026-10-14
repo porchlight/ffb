@@ -17,9 +17,9 @@ const server = http.createServer((req, res) => {
     console.log(`Received request for: ${req.url}`);
 
     // Special case for the cheat sheet file which might have spaces in the name
-    if (req.url.includes('Fantasy%20Football%20Cheat%20Sheet_%202025.html') ||
-        req.url.includes('Fantasy Football Cheat Sheet_ 2025.html')) {
-        const cheatSheetPath = path.join(__dirname, 'assets', 'sheet', 'Fantasy Football Cheat Sheet_ 2025.html');
+    if (req.url.includes('Fantasy%20Football%20Cheat%20Sheet_%202026.html') ||
+        req.url.includes('Fantasy Football Cheat Sheet_ 2026.html')) {
+        const cheatSheetPath = path.join(__dirname, 'assets', 'sheet', 'Fantasy Football Cheat Sheet_ 2026.html');
         console.log(`Special handling for cheat sheet: ${cheatSheetPath}`);
 
         fs.readFile(cheatSheetPath, (err, content) => {
